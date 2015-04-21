@@ -1,0 +1,32 @@
+{
+  "checksums": {
+    "manifests/params.pp": "e306b9522e7556aaef668fcb5d1b10c0",
+    "Rakefile": "f37e6131fe7de9a49b09d31596f5fbf1",
+    "tests/init.pp": "57c1fe7dab08ac174445636529428484",
+    "spec/spec_helper.rb": "3ea886dd135e120afa31e0aab12e85b0",
+    "spec/spec.opts": "a600ded995d948e393fbe2320ba8e51c",
+    "lib/puppet/provider/package/homebrew.rb": "5b2b1db46c6f6fc8b36e9c1b7b7e1663",
+    "README.md": "4239c5b04ba8f4574664406e1b7bfb09",
+    "manifests/init.pp": "3c3ab84f19d43222f6b4dde194a940de",
+    "manifests/compiler.pp": "cc430e7d6bd854e6505dc762334744ba",
+    "lib/facter/has_compiler.rb": "a9f8d5541e3ab89d286466fdeb13a5e7",
+    "Gemfile.lock": "5b425f8170b2b0f7c9e25aab53ae96b6",
+    "Modulefile": "b91956ea95ec565b4cde7ccc336f329c",
+    "manifests/install.pp": "b8f18e5d54bda7d1fe41a2b0ddb784ce",
+    "Gemfile": "c5e08065bb16fecba3f90b84247c255c"
+  },
+  "author": "bjoernalbers",
+  "types": [
+
+  ],
+  "source": "UNKNOWN",
+  "dependencies": [
+
+  ],
+  "summary": "A Homebrew package provider for Mac OS X (brewery included)",
+  "project_page": "https://github.com/bjoernalbers/puppet-homebrew",
+  "description": "(Please visit the project page!)",
+  "name": "bjoernalbers-homebrew",
+  "version": "0.2.0",
+  "license": "Apache License, Version 2.0"
+}
