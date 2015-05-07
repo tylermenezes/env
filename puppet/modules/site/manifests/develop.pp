@@ -11,13 +11,14 @@ class site::develop () {
         path        => ['/bin', '/usr/bin', '/usr/sbin']
     }
 
-
     package {
         ["mono", "ack", "composer", "dart", "dartium", "php56", "php56-mcrypt", "mysql", "node"]:
         ensure      => installed,
         provider    => brew
+    } ->
+    pip::install { "Pygments":
+        ensure      => installed
     }
-    
 
     package { "zsh":
         ensure      => installed,
@@ -47,8 +48,13 @@ class site::develop () {
             notify      => Service["homebrew.mxcl.dnsmasq"]
         } ->
         file { "/etc/resolver/dev":
-            path        => "/etc/resolver=dev",
-            content     => "nameserver 127.0.0.1",
+            path        => "/etc/resolver/dev",
+            content     => "nameserver 127.0.0.1\nport 5353",
+            ensure      => file
+        } ->
+        file { "/etc/resolver/srnd":
+            path        => "/etc/resolver/srnd",
+            content     => "nameserver 10.8.0.1",
             ensure      => file
         }
 

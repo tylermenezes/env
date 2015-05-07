@@ -19,6 +19,14 @@ class site::syncfs () {
         fail ("Please configure Boxcryptor")
     }
 
+    defaults::write { "move iterm2 folder":
+        ensure => present,
+        domain => 'com.googlecode.iterm2',
+        key    => 'PrefsCustomFolder',
+        value  => '/Users/tylermenezes/Dropbox/Local FS/Developer/iTerm',
+        user   => $username
+    }
+
 
     # File and folder links
 
@@ -61,12 +69,6 @@ class site::syncfs () {
     file { "$home/.zshrc":
         path        => "$home/.zshrc",
         target      => "$dir_boxcryptor_home/.zshrc",
-        ensure      => link
-    }
-
-    file { "$home/.mysql_history": 
-        path        => "$home/.mysql_history",
-        target      => "$dir_boxcryptor_home/.mysql_history",
         ensure      => link
     }
 }

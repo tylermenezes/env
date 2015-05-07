@@ -1,0 +1,8 @@
+{
+  "LICENSE": "e8c1458438ead3c34974bc0be3a03ed6",
+  "README.md": "1786f27af9f2eec6c6d916874f311103",
+  "manifests/init.pp": "61f106de5131ebdc9050ad480d71f4cb",
+  "manifests/install.pp": "e2a5b611002ba51638b9ff555b4c5a34",
+  "manifests/installation.pp": "e81f27b6e4140f8f595aa1c8465e6652",
+  "metadata.json": "2d458ef2283a16f297b267feb8e63024"
+}
