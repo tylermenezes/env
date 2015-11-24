@@ -18,7 +18,7 @@ class site::syncfs () {
 
     exec {"dirCloudExists":
         command     => '/bin/true',
-        onlyif      => '/usr/bin/test -e /path/must/be/available',
+        onlyif      => "/usr/bin/test -e $dirCloud",
     }
 
     # Create symlinks for every file in the ~/Cloud/ folder:
