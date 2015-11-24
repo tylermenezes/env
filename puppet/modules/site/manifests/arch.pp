@@ -1,11 +1,21 @@
 class site::arch () {
+    # makepkg fix
+    exec { "makepkg-fix":
+        command     => 'LINE=$(expr $(grep -nr "Running %s as root is not allowed" `which makepkg` | cut -d : -f 1) - 2);ELINE=$(expr $LINE + 11);sed -i "$LINE,${ELINE}d" `which makepkg`',
+        onlyif      => 'grep -q "Running %s as root is not allowed" `which makepkg`',
+        provider    => shell,
+        path        => '/usr/local/bin/:/bin/'
+    }
+
+    Package { require => Exec['makepkg-fix'] }
 
     # Libraries, Interpreters, Compilers, and Servers
     package {[
         "mono", "go", "memcached", "beanstalkd", "nginx", "nodejs", "npm",
         "php7", "php7-fpm", "php7-gd", "php7-mcrypt", "phpunit", "ruby",
         "jre7-openjdk-headless", "jre7-openjdk", "jdk7-openjdk",
-        "jre8-openjdk-headless", "jre8-openjdk", "jdk8-openjdk"
+        "jre8-openjdk-headless", "jre8-openjdk", "jdk8-openjdk",
+        "mariadb", "acpi", "sysstat"
     ]:
         ensure      => installed,
         provider    => pacman
@@ -13,8 +23,9 @@ class site::arch () {
 
     # UI
     package {[
-        "xorg", "xbindkeys", "i3-wm", "i3status", "redshift", "networkmanager",
-        "networkmanager-openvpn", "compton", "ttf-dejavu", "ttf-droid"
+        "xorg", "xbindkeys", "i3-wm", "i3blocks", "redshift", "networkmanager",
+        "networkmanager-openvpn", "compton", "ttf-dejavu", "ttf-droid",
+        "pasystray", "paprefs", "rofi"
     ]:
         ensure      => installed,
         provider    => pacman
@@ -47,6 +58,24 @@ class site::arch () {
     ]:
         ensure      => present,
         provider    => gem
+    } ->
+
+    service {"NetworkManager":
+        ensure      => running,
+        enable      => true
+    } ->
+    service {"cronie":
+        ensure      => running,
+        enable      => true
+    } ->
+    service {"bluetooth":
+        ensure      => running,
+        enable      => true
+    }
+
+    service {"iptables":
+        ensure      => running,
+        enable      => true
     }
 
     # Remove Apache

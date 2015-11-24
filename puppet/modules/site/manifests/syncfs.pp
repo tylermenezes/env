@@ -23,11 +23,18 @@ class site::syncfs () {
 
     # Create symlinks for every file in the ~/Cloud/ folder:
     exec { "link-files-$home":
-        command     => "find . -maxdepth 1 $(find .. -maxdepth 1 -printf '-not -name %f ') -not -name '.' -not -name 'System' -printf '%f\n' | xargs -I {} sh -c 'ln -s \"$dirCloud/\$1\" \"$home/\$1\"' - {}",
-        onlyif      => "find . -maxdepth 1 $(find .. -maxdepth 1 -printf '-not -name %f ') -not -name '.' -not -name 'System' -printf '%f\n' | egrep '.*'",
+        command     => "find . -maxdepth 1 $(find .. -maxdepth 1 -printf '-not -name %f ') -not -name '.' -not -name 'System' -not -name 'Utils' -printf '%f\n' | xargs -I {} sh -c 'ln -s \"$dirCloud/\$1\" \"$home/\$1\"' - {}",
+        onlyif      => "find . -maxdepth 1 $(find .. -maxdepth 1 -printf '-not -name %f ') -not -name '.' -not -name 'System' -not -name 'Utils' -printf '%f\n' | egrep '.*'",
         path        => '/usr/local/bin/:/bin/',
         cwd         => $dirCloud,
         provider    => shell,
-        require     => Exec["dirCloudExists"]
+        require     => Exec["dirCloudExists"],
+        user        => $username
+    }
+
+    # iptables rules
+    file {"/etc/iptables/iptables.rules":
+        ensure      => link,
+        target      => "$dirCloud/System/etc/iptables/iptables.rules"
     }
 }

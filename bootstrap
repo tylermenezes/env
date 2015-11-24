@@ -76,9 +76,6 @@ fi
 
 ## Apply Config
 echo "Applying config..."
-if [ "$(uname)" == "Darwin" ]; then
-    USERNAME=$(whoami)
-    FACTER_username=$USERNAME puppet apply --verbose --debug --modulepath="$ENVDIR/puppet/modules" "$ENVDIR/puppet/manifests/init.pp"
-else
-    puppet apply --verbose --debug --modulepath="$ENVDIR/puppet/modules" "$ENVDIR/puppet/manifests/init.pp"
-fi
+PATH=$PATH:/usr/bin/core_perl/
+USERNAME=$(whoami)
+sudo FACTER_username=$USERNAME puppet apply --verbose --modulepath="$ENVDIR/puppet/modules" "$ENVDIR/puppet/manifests/init.pp" $1

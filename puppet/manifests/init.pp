@@ -8,6 +8,7 @@ if $::operatingsystem == 'Darwin' {
     include site::mac
 } else {
     include site::arch
+    include site::apparmor
 }
 
 include site::syncfs
