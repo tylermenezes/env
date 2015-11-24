@@ -1,74 +1,33 @@
 class site::syncfs () {
 
     # Directories
+    $dirCloud = "$home/Cloud"
 
-    case $::operatingsystem {
-        "Darwin": {
-            $dir_dropbox_home        = "$home/Dropbox/Local FS"
-            $dir_boxcryptor_home     = "/Volumes/Boxcryptor/Dropbox/Local FS"
+    # Remove the Desktop folder (Linux) or make it redirect to the Downloads
+    # folder (Mac):
+    if $operatingsystem == 'Darwin' {
+        file { "$home/Desktop":
+            ensure  => link,
+            target  => "$home/Downloads"
+        }
+    } else {
+        file { "$home/Desktop":
+            ensure  => absent
         }
     }
 
-
-    # Programs
-    if ! $::dropbox {
-        fail("Please configure Dropbox")
+    exec {"dirCloudExists":
+        command     => '/bin/true',
+        onlyif      => '/usr/bin/test -e /path/must/be/available',
     }
 
-    if ! $::boxcryptor {
-        fail ("Please configure Boxcryptor")
-    }
-
-    defaults::write { "move iterm2 folder":
-        ensure => present,
-        domain => 'com.googlecode.iterm2',
-        key    => 'PrefsCustomFolder',
-        value  => '/Users/tylermenezes/Dropbox/Local FS/Developer/iTerm',
-        user   => $username
-    }
-
-
-    # File and folder links
-
-    file { "$home/Documents": 
-        path        => "$home/Documents",
-        target      => "$dir_boxcryptor_home/Documents/",
-        ensure      => link
-    }
-
-    file { "$home/Github": 
-        path        => "$home/Github",
-        target      => "$dir_dropbox_home/Github/",
-        ensure      => link
-    }
-
-    file { "$home/Pictures": 
-        path        => "$home/Pictures",
-        target      => "$dir_dropbox_home/Pictures/",
-        ensure      => link
-    }
-
-    file { "$home/.ssh": 
-        path        => "$home/.ssh",
-        target      => "$dir_boxcryptor_home/.ssh",
-        ensure      => link
-    }
-
-    file { "$home/.vimperator": 
-        path        => "$home/.vimperator",
-        target      => "$dir_boxcryptor_home/.vimperator/",
-        ensure      => link
-    }
-
-    file { "$home/.vimperatorrc": 
-        path        => "$home/.vimperatorrc",
-        target      => "$dir_boxcryptor_home/.vimperatorrc",
-        ensure      => link
-    }
-
-    file { "$home/.zshrc":
-        path        => "$home/.zshrc",
-        target      => "$dir_boxcryptor_home/.zshrc",
-        ensure      => link
+    # Create symlinks for every file in the ~/Cloud/ folder:
+    exec { "link-files-$home":
+        command     => "find . -maxdepth 1 $(find .. -maxdepth 1 -printf '-not -name %f ') -not -name '.' -not -name 'System' -printf '%f\n' | xargs -I {} sh -c 'ln -s \"$dirCloud/\$1\" \"$home/\$1\"' - {}",
+        onlyif      => "find . -maxdepth 1 $(find .. -maxdepth 1 -printf '-not -name %f ') -not -name '.' -not -name 'System' -printf '%f\n' | egrep '.*'",
+        path        => '/usr/local/bin/:/bin/',
+        cwd         => $dirCloud,
+        provider    => shell,
+        require     => Exec["dirCloudExists"]
     }
 }

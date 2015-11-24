@@ -1,7 +1,13 @@
-$home = "/Users/$username"
+if $username == undef {
+    $username = $::identity[user]
+}
+$home = "/home/$username"
 
-include site::basic
-include site::develop
-include site::productivity
-include site::security
+if $::operatingsystem == 'Darwin' {
+    $home = "/Users/$username"
+    include site::mac
+} else {
+    include site::arch
+}
+
 include site::syncfs

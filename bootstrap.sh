@@ -2,31 +2,63 @@
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 
 ## Install Puppet
+if [ "$(uname)" == "Darwin" ]; then
+    if ! [ -x "$(command -v facter)" ]; then
+        echo "Installing facter..."
+        curl http://downloads.puppetlabs.com/mac/facter-latest.dmg -o /tmp/facter-latest.dmg
+        hdiutil attach /tmp/facter-latest.dmg
+        sudo installer -pkg /Volumes/facter-*/facter-*.pkg -target /
+        hdiutil detach /Volumes/facter-*
+    fi
 
-if ! [ -x "$(command -v facter)" ]; then
-    echo "Installing facter..."
-    curl http://downloads.puppetlabs.com/mac/facter-latest.dmg -o /tmp/facter-latest.dmg
-    hdiutil attach /tmp/facter-latest.dmg
-    sudo installer -pkg /Volumes/facter-*/facter-*.pkg -target /
-    hdiutil detach /Volumes/facter-*
+    if ! [ -x "$(command -v hiera)" ]; then
+        echo "Installing hiera..."
+        curl http://downloads.puppetlabs.com/mac/hiera-latest.dmg -o /tmp/hiera-latest.dmg
+        hdiutil attach /tmp/hiera-latest.dmg
+        sudo installer -pkg /Volumes/hiera-*/hiera-*.pkg -target /
+        hdiutil detach /Volumes/hiera-*
+    fi
+
+    if ! [ -x "$(command -v puppet)" ]; then
+        echo "Installing puppet..."
+        curl http://downloads.puppetlabs.com/mac/puppet-latest.dmg -o /tmp/puppet-latest.dmg
+        hdiutil attach /tmp/puppet-latest.dmg
+        sudo installer -pkg /Volumes/puppet-*/puppet-*.pkg -target /
+        hdiutil detach /Volumes/puppet-*
+    fi
+
+    if ! [ $(xcode-select -p) ]; then
+        sudo xcode-select --install
+    fi
+else
+    if ! pacman -Qi yajl tar wget > /dev/null 2>&1; then
+        echo "installing"
+        sudo pacman -S --noconfirm base-devel yajl tar wget
+    fi
+
+    if ! pacman -Qi yaourt > /dev/null 2>&1; then
+        mkdir -p ~/temp/AUR/ && pushd ~/temp/AUR/
+
+        wget https://aur.archlinux.org/cgit/aur.git/snapshot/package-query.tar.gz
+        tar xfz package-query.tar.gz
+        cd package-query
+        sudo pacman -U package-query*.pkg.tar.gz
+        cd ..
+        rm -rf package-query
+
+        wget https://aur.archlinux.org/cgit/aur.git/snapshot/yaourt.tar.gz
+        tar xzf yaourt.tar.gz
+        cd yaourt  &&  makepkg
+        sudo pacman -U yaourt*.pkg.tar.xz
+        cd ..
+        rm -rf yaourt
+        popd
+    fi
+
+    if ! pacman -Qi puppet > /dev/null 2>&1; then
+        yaourt -S --noconfirm --force puppet git
+    fi
 fi
-
-if ! [ -x "$(command -v hiera)" ]; then
-    echo "Installing hiera..."
-    curl http://downloads.puppetlabs.com/mac/hiera-latest.dmg -o /tmp/hiera-latest.dmg
-    hdiutil attach /tmp/hiera-latest.dmg
-    sudo installer -pkg /Volumes/hiera-*/hiera-*.pkg -target /
-    hdiutil detach /Volumes/hiera-*
-fi
-
-if ! [ -x "$(command -v puppet)" ]; then
-    echo "Installing puppet..."
-    curl http://downloads.puppetlabs.com/mac/puppet-latest.dmg -o /tmp/puppet-latest.dmg
-    hdiutil attach /tmp/puppet-latest.dmg
-    sudo installer -pkg /Volumes/puppet-*/puppet-*.pkg -target /
-    hdiutil detach /Volumes/puppet-*
-fi
-
 
 ## Get Config
 if [ -d "$DIR/puppet" ]; then
@@ -42,18 +74,11 @@ else
     ENVDIR="/tmp/env"
 fi
 
-
-
-## Install a few other things we need for puppet
-
-if ! [ $(xcode-select -p) ]; then
-    sudo xcode-select --install
-fi
-
-
-
 ## Apply Config
-
 echo "Applying config..."
-USERNAME=$(whoami)
-sudo FACTER_username=$USERNAME puppet apply --verbose --modulepath="$ENVDIR/puppet/modules" "$ENVDIR/puppet/manifests/init.pp"
+if [ "$(uname)" == "Darwin" ]; then
+    USERNAME=$(whoami)
+    FACTER_username=$USERNAME puppet apply --verbose --debug --modulepath="$ENVDIR/puppet/modules" "$ENVDIR/puppet/manifests/init.pp"
+else
+    puppet apply --verbose --debug --modulepath="$ENVDIR/puppet/modules" "$ENVDIR/puppet/manifests/init.pp"
+fi

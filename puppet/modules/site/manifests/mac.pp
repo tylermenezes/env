@@ -3,11 +3,75 @@ class site::basic () {
         ensure      => file
     }
 
-    defaults::write { "require pass at screensaver":
+    # Programs
+
+    exec { "brew-ownership":
+        command     => "chown root /usr/local/bin/brew",
+        onlyif      => 'bash -c \'[ $(ls -ld /usr/local/bin/brew | awk "{print \$3}") != root ]\'',
+        path        => ['/bin', '/usr/bin', '/usr/sbin']
+    }
+
+    package {
+        ["mono", "ack", "composer", "dart", "dartium", "php56", "php56-mcrypt", "mysql", "node"]:
+        ensure      => installed,
+        provider    => brew
+    } ->
+    pip::install { "Pygments":
+        ensure      => installed
+    }
+
+    package { "zsh":
+        ensure      => installed,
+        provider    => brew
+    } ->
+        exec { "install-oh-my-zsh":
+            command     => "curl -L https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh | sh",
+            creates     => "$home/.oh-my-zsh",
+            cwd         => "$home",
+            path        => ['/bin', '/usr/bin']
+        }
+
+
+    package { "dnsmasq":
+        ensure      => installed,
+        provider    => brew
+    } ->
+        file { "/Library/LaunchDaemons/homebrew.mxcl.dnsmasq.plist":
+            path        => "/Library/LaunchDaemons/homebrew.mxcl.dnsmasq.plist",
+            content     => file("site/homebrew.mxcl.dnsmasq.plist"),
+            ensure      => file
+        } ->
+        file { "/usr/local/etc/dnsmasq.conf":
+            path        => "/usr/local/etc/dnsmasq.conf",
+            content     => file("site/dnsmasq.conf"),
+            ensure      => file,
+            notify      => Service["homebrew.mxcl.dnsmasq"]
+        } ->
+        file { "/etc/resolver/dev":
+            path        => "/etc/resolver/dev",
+            content     => "nameserver 127.0.0.1\nport 5353",
+            ensure      => file
+        } ->
+        file { "/etc/resolver/srnd":
+            path        => "/etc/resolver/srnd",
+            content     => "nameserver 10.8.0.1",
+            ensure      => file
+        }
+
+    service { "homebrew.mxcl.dnsmasq":
+        ensure      => running,
+        enable      => true,
+        require     => File["/usr/local/etc/dnsmasq.conf"]
+    }
+
+
+    # Config
+
+    defaults::write { "dont require pass at screensaver":
         ensure => present,
         domain => 'com.apple.screensaver',
         key    => 'askForPassword',
-        value  => 1,
+        value  => 0,
         user   => $username
     }
 
@@ -186,6 +250,4 @@ class site::basic () {
         value  => 1,
         user   => $username
     }
-
-    # TODO: Install Dashlane
 }
