@@ -7,6 +7,11 @@ class site::arch () {
         path        => '/usr/local/bin/:/bin/'
     }
 
+    file { "/usr/bin/python":
+        ensure      => link,
+        target      => "/usr/bin/python3.5"
+    }
+
     Package { require => Exec['makepkg-fix'] }
 
     # Libraries, Interpreters, Compilers, and Servers
@@ -46,7 +51,7 @@ class site::arch () {
     package {[
         "chromium", "intellij-idea-ultimate-edition", "mopidy", "ncmpcpp",
         "spideroak-one", "steam", "terminator", "texlive-bin", "texlive-core",
-        "texinfo", "texmaker",  "thunar", "vinagre", "atom-editor-bin"
+        "texinfo", "texmaker",  "thunar", "vinagre", "atom-editor-bin", "firefox"
     ]:
         ensure      => installed,
         provider    => pacman
@@ -78,8 +83,10 @@ class site::arch () {
         enable      => true
     }
 
-    # Remove Apache
-    package { "apache":
+    # Remove some packages
+    package {[
+        "apache", "xorg-fonts-100dpi"
+    ]:
         ensure      => absent,
         provider    => pacman
     }

@@ -28,9 +28,15 @@ class site::apparmor () {
         ensure      => installed,
         provider    => pacman,
         require     => Exec["apparmor-kernel"]
-    } ->
+    }
+
+    file { "/etc/apparmor.d":
+        source      => "$home/Cloud/System/etc/apparmor.d",
+        recurse     => true,
+        require     => Package["apparmor"]
+    } ~>
     service {"apparmor":
         ensure      => running,
-        enable      => true
+        enable      => true,
     }
 }

@@ -77,5 +77,6 @@ fi
 ## Apply Config
 echo "Applying config..."
 PATH=$PATH:/usr/bin/core_perl/
+PYTHONPATH="/usr/lib/python3.5/site-packages"
 USERNAME=$(whoami)
 sudo FACTER_username=$USERNAME puppet apply --verbose --modulepath="$ENVDIR/puppet/modules" "$ENVDIR/puppet/manifests/init.pp" $1
