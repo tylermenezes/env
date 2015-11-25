@@ -85,7 +85,7 @@ class site::arch () {
 
     # Remove some packages
     package {[
-        "apache", "xorg-fonts-100dpi"
+        "apache"
     ]:
         ensure      => absent,
         provider    => pacman

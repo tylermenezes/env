@@ -12,7 +12,8 @@ class site::syncfs () {
         }
     } else {
         file { "$home/Desktop":
-            ensure  => absent
+            ensure  => absent,
+            force   => true
         }
     }
 
