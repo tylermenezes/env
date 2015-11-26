@@ -53,7 +53,7 @@ class site::arch () {
         "chromium", "intellij-idea-ultimate-edition", "mopidy", "ncmpcpp",
         "spideroak-one", "steam", "terminator", "texlive-bin", "texlive-core",
         "texinfo", "texmaker",  "thunar", "vinagre", "atom-editor-bin", "firefox",
-        "task"
+        "task", "android-studio"
     ]:
         ensure      => installed,
         provider    => pacman
