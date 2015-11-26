@@ -30,7 +30,8 @@ class site::arch () {
     package {[
         "xorg", "xbindkeys", "i3-wm", "i3blocks", "redshift", "networkmanager",
         "networkmanager-openvpn", "compton", "ttf-dejavu", "ttf-droid",
-        "pasystray", "paprefs", "rofi"
+        "pasystray", "paprefs", "rofi", "gtk-engine-unico", "gtk-engine-murrine",
+        "gtk-engines", "unclutter-xfixes-git"
     ]:
         ensure      => installed,
         provider    => pacman
