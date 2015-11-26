@@ -52,7 +52,8 @@ class site::arch () {
     package {[
         "chromium", "intellij-idea-ultimate-edition", "mopidy", "ncmpcpp",
         "spideroak-one", "steam", "terminator", "texlive-bin", "texlive-core",
-        "texinfo", "texmaker",  "thunar", "vinagre", "atom-editor-bin", "firefox"
+        "texinfo", "texmaker",  "thunar", "vinagre", "atom-editor-bin", "firefox",
+        "task"
     ]:
         ensure      => installed,
         provider    => pacman
@@ -77,13 +78,26 @@ class site::arch () {
     service {"bluetooth":
         ensure      => running,
         enable      => true
+    } ->
+
+    cron { "taskwarrior":
+        command     => "task sync > /dev/null 2>&1",
+        user        => $username,
+        minute      => "*/5"
+    }
+
+    cron { "rm-downloads":
+        command     => "rm -rf $home/Downloads/*",
+        user        => $username,
+        hour        => 9,
+        minute      => 0
     }
 
     service {"iptables":
         ensure      => running,
         enable      => true
     }
-
+ 
     # Remove some packages
     package {[
         "apache"
