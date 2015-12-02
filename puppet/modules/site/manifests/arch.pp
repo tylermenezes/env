@@ -20,7 +20,9 @@ class site::arch () {
         "php7", "php7-fpm", "php7-gd", "php7-mcrypt", "phpunit", "ruby",
         "jre7-openjdk-headless", "jre7-openjdk", "jdk7-openjdk",
         "jre8-openjdk-headless", "jre8-openjdk", "jdk8-openjdk",
-        "mariadb", "acpi", "sysstat"
+        "mariadb", "acpi", "sysstat", "python-pyqt4", "python-pyqt5",
+        "phonon-qt4-vlc", "kdebindings-python", "python-qscintilla",
+        "phonon-qt5-vlc", "oxygen", "oxygen-icons"
     ]:
         ensure      => installed,
         provider    => pacman
@@ -42,7 +44,8 @@ class site::arch () {
         "aspell", "bind-tools", "gnupg", "gparted", "gzip", "htop",
         "imagemagick", "iptables", "git", "nano", "ncurses", "opensc", "rsync",
         "screen", "scrot", "tmux", "unzip", "vim", "wget", "wpa_supplicant",
-        "zsh", "pinentry", "cronie", "curl", "cups", "espeak", "grep", "ack"
+        "zsh", "pinentry", "cronie", "curl", "cups", "espeak", "grep", "ack",
+        "at"
     ]:
         ensure      => installed,
         provider    => pacman
@@ -53,7 +56,7 @@ class site::arch () {
         "chromium", "intellij-idea-ultimate-edition", "mopidy", "ncmpcpp",
         "spideroak-one", "steam", "terminator", "texlive-bin", "texlive-core",
         "texinfo", "texmaker",  "thunar", "vinagre", "atom-editor-bin", "firefox",
-        "task", "android-studio"
+        "task", "android-studio", "autokey-py3"
     ]:
         ensure      => installed,
         provider    => pacman
@@ -79,6 +82,10 @@ class site::arch () {
         ensure      => running,
         enable      => true
     } ->
+    service {"atd":
+        ensure      => running,
+        enable      => true
+    } ->
 
     cron { "taskwarrior":
         command     => "task sync > /dev/null 2>&1",
@@ -97,12 +104,22 @@ class site::arch () {
         ensure      => running,
         enable      => true
     }
- 
+
     # Remove some packages
     package {[
         "apache"
     ]:
         ensure      => absent,
         provider    => pacman
+    }
+
+    # udev rules
+    file { "/etc/udev/rules.d":
+        source      => "$home/Cloud/System/etc/udev/rules.d",
+        recurse     => true
+    } ~>
+    exec {"refresh-udev":
+        refreshonly => true,
+        command     => "/usr/bin/udevadm control --reload-rules"
     }
 }
