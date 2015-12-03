@@ -26,41 +26,39 @@ class site::arch () {
     ]:
         ensure      => installed,
         provider    => pacman
-    }->
+    }
 
     # UI
     package {[
-        "xorg", "xbindkeys", "i3-wm", "i3blocks", "redshift", "networkmanager",
-        "networkmanager-openvpn", "compton", "ttf-dejavu", "ttf-droid",
-        "pasystray", "paprefs", "rofi", "gtk-engine-unico", "gtk-engine-murrine",
-        "gtk-engines", "unclutter-xfixes-git"
+        "xorg", "xbindkeys", "i3-wm", "i3blocks", "redshift", "compton", "ttf-dejavu",
+        "ttf-droid", "pasystray", "paprefs", "rofi", "gtk-engine-unico",
+        "gtk-engine-murrine", "gtk-engines", "unclutter-xfixes-git", "xautolock", "i3lock-color-git"
     ]:
         ensure      => installed,
         provider    => pacman
-    }->
+    }
 
     # Tools
     package { [
         "aspell", "bind-tools", "gnupg", "gparted", "gzip", "htop",
         "imagemagick", "iptables", "git", "nano", "ncurses", "opensc", "rsync",
         "screen", "scrot", "tmux", "unzip", "vim", "wget", "wpa_supplicant",
-        "zsh", "pinentry", "cronie", "curl", "cups", "espeak", "grep", "ack",
-        "at"
+        "zsh", "pinentry", "curl", "cups", "espeak", "grep", "ack"
     ]:
         ensure      => installed,
         provider    => pacman
-    }->
+    }
 
     # Programs
     package {[
         "chromium", "intellij-idea-ultimate-edition", "mopidy", "ncmpcpp",
         "spideroak-one", "steam", "terminator", "texlive-bin", "texlive-core",
         "texinfo", "texmaker",  "thunar", "vinagre", "atom-editor-bin", "firefox",
-        "task", "android-studio", "autokey-py3"
+        "android-studio", "autokey-py3"
     ]:
         ensure      => installed,
         provider    => pacman
-    }->
+    }
 
     # Ruby Gems
     package {[
@@ -68,25 +66,63 @@ class site::arch () {
     ]:
         ensure      => present,
         provider    => gem
-    } ->
+    }
 
-    service {"NetworkManager":
+    package { "networkmanager":
+        ensure      => present,
+        provider    => pacman
+    } ->
+    package { "networkmanager-openvpn":
+        ensure      => present,
+        provider    => pacman
+    }
+    service { "NetworkManager":
         ensure      => running,
         enable      => true
+    } ->
+    file { "/etc/NetworkManager/dispatcher.d":
+        source      => "$home/Cloud/System/etc/NetworkManager/dispatcher.d",
+        recurse     => true,
+        owner       => root,
+        mode        => "0700"
+    }
+
+    package { "cronie":
+        ensure      => present,
+        provider    => pacman
     } ->
     service {"cronie":
         ensure      => running,
         enable      => true
+    }
+
+    package { "blueberry":
+        ensure      => present,
+        provider    => pacman
     } ->
     service {"bluetooth":
         ensure      => running,
         enable      => true
+    }
+
+    package { "at":
+        ensure      => present,
+        provider    => pacman
     } ->
     service {"atd":
         ensure      => running,
         enable      => true
-    } ->
+    }
 
+    service { "systemd-timesyncd":
+        ensure      => running,
+        enable      => true
+    }
+
+    package { "task":
+        ensure      => present,
+        provider    => pacman
+    } ->
     cron { "taskwarrior":
         command     => "task sync > /dev/null 2>&1",
         user        => $username,
