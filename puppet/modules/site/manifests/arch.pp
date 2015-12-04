@@ -136,6 +136,12 @@ class site::arch () {
         minute      => 0
     }
 
+    cron { "journalctl-cleanup":
+        command     => "journalctl --vacuum-time=1h",
+        user        => $username,
+        minute      => 0
+    }
+
     service {"iptables":
         ensure      => running,
         enable      => true
