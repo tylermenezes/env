@@ -18,11 +18,10 @@ class site::arch () {
     package {[
         "mono", "go", "memcached", "beanstalkd", "nginx", "nodejs", "npm",
         "php7", "php7-fpm", "php7-gd", "php7-mcrypt", "phpunit", "ruby",
-        "jre7-openjdk-headless", "jre7-openjdk", "jdk7-openjdk",
-        "jre8-openjdk-headless", "jre8-openjdk", "jdk8-openjdk",
+        "jre8-openjdk-infinality", "jdk8-openjdk-infinality",
         "mariadb", "acpi", "sysstat", "python-pyqt4", "python-pyqt5",
         "phonon-qt4-vlc", "kdebindings-python", "python-qscintilla",
-        "phonon-qt5-vlc", "oxygen", "oxygen-icons"
+        "phonon-qt5-vlc", "oxygen", "oxygen-icons", "python-crypto"
     ]:
         ensure      => installed,
         provider    => pacman
@@ -30,8 +29,8 @@ class site::arch () {
 
     # UI
     package {[
-        "xorg", "xbindkeys", "i3-wm", "i3blocks", "redshift", "compton", "ttf-dejavu",
-        "ttf-droid", "pasystray", "paprefs", "rofi", "gtk-engine-unico",
+        "xorg", "xbindkeys", "i3-gaps-git", "i3blocks", "redshift", "compton", "ttf-dejavu",
+        "ttf-droid", "pasystray", "paprefs", "rofi", "gtk-engine-unico", "tumbler",
         "gtk-engine-murrine", "gtk-engines", "unclutter-xfixes-git", "xautolock", "i3lock-color-git"
     ]:
         ensure      => installed,
@@ -43,7 +42,7 @@ class site::arch () {
         "aspell", "bind-tools", "gnupg", "gparted", "gzip", "htop",
         "imagemagick", "iptables", "git", "nano", "ncurses", "opensc", "rsync",
         "screen", "scrot", "tmux", "unzip", "vim", "wget", "wpa_supplicant",
-        "zsh", "pinentry", "curl", "cups", "espeak", "grep", "ack"
+        "zsh", "pinentry", "curl", "cups", "espeak", "grep", "ack", "archey3"
     ]:
         ensure      => installed,
         provider    => pacman
@@ -51,10 +50,10 @@ class site::arch () {
 
     # Programs
     package {[
-        "chromium", "intellij-idea-ultimate-edition", "mopidy", "ncmpcpp",
+        "mopidy", "ncmpcpp", "gimp",
         "spideroak-one", "steam", "terminator", "texlive-bin", "texlive-core",
         "texinfo", "texmaker",  "thunar", "vinagre", "atom-editor-bin", "firefox",
-        "android-studio", "autokey-py3"
+        "autokey-py3", "jrnl"
     ]:
         ensure      => installed,
         provider    => pacman
@@ -68,6 +67,20 @@ class site::arch () {
         provider    => gem
     }
 
+    # IntelliJ
+    package { "intellij-idea-ue-eap":
+        ensure      => present,
+        provider    => pacman
+    } ->
+    file { "/opt/intellij-idea-ue-eap/bin/idea.properties":
+        source      => "$home/Cloud/System/opt/intellij-idea-ue-eap/bin/idea.properties"
+    } ->
+    file { "/usr/bin/intellij-idea":
+        ensure      => link,
+        target      => "/opt/intellij-idea-ue-eap/bin/idea.sh"
+    }
+
+    # Network
     package { "networkmanager":
         ensure      => present,
         provider    => pacman
@@ -87,6 +100,7 @@ class site::arch () {
         mode        => "0700"
     }
 
+    # Cronjobs
     package { "cronie":
         ensure      => present,
         provider    => pacman
@@ -96,6 +110,15 @@ class site::arch () {
         enable      => true
     }
 
+    Cron { require  => Package["cronie"] }
+
+    cron { "unsplash-daily":
+        command      => "unsplash-daily",
+        user         => $username,
+        hour         => "*/3"
+    }
+
+    # Bluetooth
     package { "blueberry":
         ensure      => present,
         provider    => pacman
@@ -105,6 +128,7 @@ class site::arch () {
         enable      => true
     }
 
+    # At
     package { "at":
         ensure      => present,
         provider    => pacman
@@ -112,6 +136,30 @@ class site::arch () {
     service {"atd":
         ensure      => running,
         enable      => true
+    }
+
+    # Fonts
+    exec { "ensure-infinality":
+        command     => 'printf "\n[infinality-bundle]\nServer = http://bohoomil.com/repo/x86_64\nSigLevel = Never\n[infinality-bundle-multilib]\nServer = http://bohoomil.com/repo/multilib/x86_64\nSigLevel = Never\n[infinality-bundle-fonts]\nServer = http://bohoomil.com/repo/fonts\nSigLevel = Never" >> /etc/pacman.conf',
+        unless      => 'grep -q "infinality" /etc/pacman.conf',
+        provider    => shell,
+        path        => '/usr/local/bin/:/usr/bin/:/bin/',
+        notify      => Exec['pacman-update']
+    } ->
+    package { [
+        "infinality-bundle",
+        "infinality-bundle-multilib"
+    ]:
+        ensure      => installed,
+        provider    => pacman
+    }
+    
+
+    exec { "pacman-update":
+        command     => "pacman -Syy",
+        provider    => shell,
+        path        => "/usr/local/bin/:/usr/bin/:/bin/",
+        refreshonly => true
     }
 
     service { "systemd-timesyncd":
