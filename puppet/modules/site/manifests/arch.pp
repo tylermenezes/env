@@ -21,7 +21,8 @@ class site::arch () {
         "jre8-openjdk-infinality", "jdk8-openjdk-infinality",
         "mariadb", "acpi", "sysstat", "python-pyqt4", "python-pyqt5",
         "phonon-qt4-vlc", "kdebindings-python", "python-qscintilla",
-        "phonon-qt5-vlc", "oxygen", "oxygen-icons", "python-crypto"
+        "phonon-qt5-vlc", "oxygen", "oxygen-icons", "python-crypto",
+        "chromium-pepper-flash", "freshplayerplugin-git"
     ]:
         ensure      => installed,
         provider    => pacman
@@ -100,6 +101,18 @@ class site::arch () {
         mode        => "0700"
     }
 
+    # Fonts
+    file { "/usr/share/fonts":
+        source      => "$home/Cloud/System/usr/share/fonts",
+        recurse     => true,
+        owner       => root,
+        mode        => "0644"
+    } ~>
+    exec { "fc-cache":
+        command     => "/usr/bin/fc-cache",
+        refreshonly => true
+    }
+
     # Cronjobs
     package { "cronie":
         ensure      => present,
@@ -112,10 +125,11 @@ class site::arch () {
 
     Cron { require  => Package["cronie"] }
 
-    cron { "unsplash-daily":
-        command      => "unsplash-daily",
+    cron { "unsplash-random":
+        command      => "XAUTHORITY=/home/$username/.Xauthority DISPLAY=:0 ~/Cloud/System/usr/bin/unsplash-random",
         user         => $username,
-        hour         => "*/3"
+        hour         => "*",
+        minute       => "1"
     }
 
     # Bluetooth
