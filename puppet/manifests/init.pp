@@ -8,6 +8,8 @@ if $::operatingsystem == 'Darwin' {
     include site::mac
 } else {
     include site::arch
+    include site::archui
+    include site::archdevel
     include site::apparmor
 }
 

@@ -7,6 +7,13 @@ class site::arch () {
         path        => '/usr/local/bin/:/bin/'
     }
 
+    exec { "pacman-update":                                                                         
+        command     => "pacman -Syy",                                                               
+        provider    => shell,                                                                       
+        path        => "/usr/local/bin/:/usr/bin/:/bin/",                                           
+        refreshonly => true                                                                         
+    }
+
     file { "/usr/bin/python":
         ensure      => link,
         target      => "/usr/bin/python3.5"
@@ -14,25 +21,11 @@ class site::arch () {
 
     Package { require => Exec['makepkg-fix'] }
 
-    # Libraries, Interpreters, Compilers, and Servers
+    # Libraries
     package {[
-        "mono", "go", "memcached", "beanstalkd", "nginx", "nodejs", "npm",
-        "php7", "php7-fpm", "php7-gd", "php7-mcrypt", "phpunit", "ruby",
-        "jre8-openjdk-infinality", "jdk8-openjdk-infinality",
-        "mariadb", "acpi", "sysstat", "python-pyqt4", "python-pyqt5",
-        "phonon-qt4-vlc", "kdebindings-python", "python-qscintilla",
-        "phonon-qt5-vlc", "oxygen", "oxygen-icons", "python-crypto",
-        "chromium-pepper-flash", "freshplayerplugin-git"
-    ]:
-        ensure      => installed,
-        provider    => pacman
-    }
-
-    # UI
-    package {[
-        "xorg", "xbindkeys", "i3-gaps-git", "i3blocks", "redshift", "compton", "ttf-dejavu",
-        "ttf-droid", "pasystray", "paprefs", "rofi", "gtk-engine-unico", "tumbler",
-        "gtk-engine-murrine", "gtk-engines", "unclutter-xfixes-git", "xautolock", "i3lock-color-git"
+        "acpi", "sysstat", "python-pyqt4", "python-pyqt5",
+        "phonon-qt4-gstreamer", "kdebindings-python", "python-qscintilla",
+        "phonon-qt5-gstreamer", "oxygen", "oxygen-icons", "python-crypto",
     ]:
         ensure      => installed,
         provider    => pacman
@@ -43,44 +36,13 @@ class site::arch () {
         "aspell", "bind-tools", "gnupg", "gparted", "gzip", "htop",
         "imagemagick", "iptables", "git", "nano", "ncurses", "opensc", "rsync",
         "screen", "scrot", "tmux", "unzip", "vim", "wget", "wpa_supplicant",
-        "zsh", "pinentry", "curl", "cups", "espeak", "grep", "ack", "archey3"
+        "zsh", "pinentry", "curl", "cups", "espeak", "grep", "ack", "archey3",
+        "jrnl"
     ]:
         ensure      => installed,
         provider    => pacman
     }
-
-    # Programs
-    package {[
-        "mopidy", "ncmpcpp", "gimp",
-        "spideroak-one", "steam", "terminator", "texlive-bin", "texlive-core",
-        "texinfo", "texmaker",  "thunar", "vinagre", "atom-editor-bin", "firefox",
-        "autokey-py3", "jrnl"
-    ]:
-        ensure      => installed,
-        provider    => pacman
-    }
-
-    # Ruby Gems
-    package {[
-        "sass"
-    ]:
-        ensure      => present,
-        provider    => gem
-    }
-
-    # IntelliJ
-    package { "intellij-idea-ue-eap":
-        ensure      => present,
-        provider    => pacman
-    } ->
-    file { "/opt/intellij-idea-ue-eap/bin/idea.properties":
-        source      => "$home/Cloud/System/opt/intellij-idea-ue-eap/bin/idea.properties"
-    } ->
-    file { "/usr/bin/intellij-idea":
-        ensure      => link,
-        target      => "/opt/intellij-idea-ue-eap/bin/idea.sh"
-    }
-
+    
     # Network
     package { "networkmanager":
         ensure      => present,
@@ -89,28 +51,10 @@ class site::arch () {
     package { "networkmanager-openvpn":
         ensure      => present,
         provider    => pacman
-    }
+    } ->
     service { "NetworkManager":
         ensure      => running,
         enable      => true
-    } ->
-    file { "/etc/NetworkManager/dispatcher.d":
-        source      => "$home/Cloud/System/etc/NetworkManager/dispatcher.d",
-        recurse     => true,
-        owner       => root,
-        mode        => "0700"
-    }
-
-    # Fonts
-    file { "/usr/share/fonts":
-        source      => "$home/Cloud/System/usr/share/fonts",
-        recurse     => true,
-        owner       => root,
-        mode        => "0644"
-    } ~>
-    exec { "fc-cache":
-        command     => "/usr/bin/fc-cache",
-        refreshonly => true
     }
 
     # Cronjobs
@@ -124,23 +68,6 @@ class site::arch () {
     }
 
     Cron { require  => Package["cronie"] }
-
-    cron { "unsplash-random":
-        command      => "XAUTHORITY=/home/$username/.Xauthority DISPLAY=:0 ~/Cloud/System/usr/bin/unsplash-random",
-        user         => $username,
-        hour         => "*",
-        minute       => "1"
-    }
-
-    # Bluetooth
-    package { "blueberry":
-        ensure      => present,
-        provider    => pacman
-    } ->
-    service {"bluetooth":
-        ensure      => running,
-        enable      => true
-    }
 
     # At
     package { "at":
@@ -162,18 +89,12 @@ class site::arch () {
     } ->
     package { [
         "infinality-bundle",
-        "infinality-bundle-multilib"
+        "infinality-bundle-multilib",
+        "jre8-openjdk-infinality",
+        "jdk8-openjdk-infinality"
     ]:
         ensure      => installed,
         provider    => pacman
-    }
-    
-
-    exec { "pacman-update":
-        command     => "pacman -Syy",
-        provider    => shell,
-        path        => "/usr/local/bin/:/usr/bin/:/bin/",
-        refreshonly => true
     }
 
     service { "systemd-timesyncd":
@@ -209,21 +130,36 @@ class site::arch () {
         enable      => true
     }
 
-    # Remove some packages
-    package {[
-        "apache"
-    ]:
-        ensure      => absent,
-        provider    => pacman
-    }
-
+    ## SyncFS
     # udev rules
     file { "/etc/udev/rules.d":
         source      => "$home/Cloud/System/etc/udev/rules.d",
-        recurse     => true
+        recurse     => true,
+        require     => Exec["dirCloudExists"]
     } ~>
     exec {"refresh-udev":
         refreshonly => true,
         command     => "/usr/bin/udevadm control --reload-rules"
+    }
+
+    ## Fonts                                                                                        
+    file { "/usr/share/fonts":                                                                      
+        source      => "$home/Cloud/System/usr/share/fonts",                                        
+        recurse     => true,                                                                        
+        owner       => root,                                                                        
+        mode        => "0644",                                                                      
+        require     => Exec["dirCloudExists"]
+    } ~>                                                                                            
+    exec { "fc-cache":                                                                              
+        command     => "/usr/bin/fc-cache",                                                         
+        refreshonly => true                                                                         
+    }
+
+    file { "/etc/NetworkManager/dispatcher.d":
+        source      => "$home/Cloud/System/etc/NetworkManager/dispatcher.d",
+        recurse     => true,
+        owner       => root,
+        mode        => "0700",
+        require     => [Service["NetworkManager"], Exec["dirCloudExists"]]
     }
 }
