@@ -3,7 +3,7 @@ class site::archdevel () {
     # Programming languages and servers
     package {[
         "mono", "go", "memcached", "beanstalkd", "nginx", "nodejs", "npm",
-        "php7", "php7-fpm", "php7-gd", "php7-mcrypt", "phpunit", "ruby",
+        "php", "php-fpm", "php-gd", "php-mcrypt", "phpunit", "ruby",
         "mariadb"
     ]:
         ensure      => installed,
@@ -12,7 +12,8 @@ class site::archdevel () {
 
     # IDEs
     package {[
-        "texlive-bin", "texlive-core", "texinfo", "texmaker", "atom-editor-bin"
+        "texlive-bin", "texlive-core", "texinfo", "texmaker", "atom-editor-bin",
+        "salae-logic-beta", "minicom"
     ]:
         ensure      => installed,
         provider    => pacman

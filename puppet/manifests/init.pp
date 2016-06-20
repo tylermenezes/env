@@ -9,8 +9,8 @@ if $::operatingsystem == 'Darwin' {
 } else {
     include site::arch
     include site::archui
-    include site::archdevel
-    include site::apparmor
+#    include site::archdevel
+#    include site::apparmor
 }
 
 include site::syncfs

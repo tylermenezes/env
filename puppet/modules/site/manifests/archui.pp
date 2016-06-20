@@ -1,9 +1,10 @@
 class site::archui () {
     # UI                                                                                            
     package {[                                                                                      
-        "xorg", "xbindkeys", "i3-gaps-git", "i3blocks", "redshift", "compton", "ttf-dejavu",        
-        "ttf-droid", "pasystray", "paprefs", "rofi", "gtk-engine-unico", "tumbler",                 
-        "gtk-engine-murrine", "gtk-engines", "unclutter-xfixes-git", "xautolock", "i3lock-color-git"
+        "xorg", "xorg-xinit", "xbindkeys", "i3-gaps-next-git", "i3blocks", "redshift", "compton",
+        "ttf-dejavu", "ttf-droid", "pasystray", "paprefs", "rofi", "gtk-engine-unico", "tumbler",                 
+        "gtk-engine-murrine", "gtk-engines", "unclutter-xfixes-git", "xautolock", "i3lock-color-git",
+        "hsetroot", "kbdlight"
     ]:                                                                                              
         ensure      => installed,                                                                   
         provider    => pacman                                                                       
@@ -11,7 +12,8 @@ class site::archui () {
 
     package {[
         "mopidy", "gimp", "spideroak-one", "steam", "terminator", "thunar", "vinagre",
-        "firefox", "autokey-py3", "chromium-pepper-flash", "freshplayerplugin-git"
+        "firefox", "chromium-pepper-flash", "freshplayerplugin-git", "texmaker",
+        "texlive-most"
     ]:
         ensure      => installed,
         provider    => pacman
@@ -32,6 +34,10 @@ class site::archui () {
     service {"bluetooth":                                                                           
         ensure      => running,                                                                     
         enable      => true                                                                         
+    } ->
+    package { "pulseaudio-bluetooth":
+        ensure      => present,
+        provider    => pacman
     }
 }
 

@@ -24,7 +24,7 @@ class site::arch () {
     # Libraries
     package {[
         "acpi", "sysstat", "python-pyqt4", "python-pyqt5",
-        "phonon-qt4-gstreamer", "kdebindings-python", "python-qscintilla",
+        "phonon-qt4-gstreamer", "kdebindings-python",
         "phonon-qt5-gstreamer", "oxygen", "oxygen-icons", "python-crypto",
     ]:
         ensure      => installed,
@@ -35,9 +35,9 @@ class site::arch () {
     package { [
         "aspell", "bind-tools", "gnupg", "gparted", "gzip", "htop",
         "imagemagick", "iptables", "git", "nano", "ncurses", "opensc", "rsync",
-        "screen", "scrot", "tmux", "unzip", "vim", "wget", "wpa_supplicant",
-        "zsh", "pinentry", "curl", "cups", "espeak", "grep", "ack", "archey3",
-        "jrnl"
+        "screen", "scrot", "tmux", "unzip", "gvim", "vim-gruvbox-git",
+        "wget", "wpa_supplicant", "macfanctld", "thermald", "tlp", "powertop",
+        "zsh", "pinentry", "curl", "cups", "espeak", "grep", "ack", "archey3"
     ]:
         ensure      => installed,
         provider    => pacman
@@ -49,6 +49,10 @@ class site::arch () {
         provider    => pacman
     } ->
     package { "networkmanager-openvpn":
+        ensure      => present,
+        provider    => pacman
+    } ->
+    package { "network-manager-applet":
         ensure      => present,
         provider    => pacman
     } ->
