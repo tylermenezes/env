@@ -4,7 +4,7 @@ class site::archui () {
         "xorg", "xorg-xinit", "xbindkeys", "i3-gaps-next-git", "i3blocks", "redshift", "compton",
         "ttf-dejavu", "ttf-droid", "pasystray", "paprefs", "rofi", "gtk-engine-unico", "tumbler",                 
         "gtk-engine-murrine", "gtk-engines", "unclutter-xfixes-git", "xautolock", "i3lock-color-git",
-        "hsetroot", "kbdlight"
+        "hsetroot", "kbdlight", "mononoki-ttf", "otf-fira-code"
     ]:                                                                                              
         ensure      => installed,                                                                   
         provider    => pacman                                                                       
@@ -13,7 +13,7 @@ class site::archui () {
     package {[
         "mopidy", "gimp", "spideroak-one", "steam", "terminator", "thunar", "vinagre",
         "firefox", "chromium-pepper-flash", "freshplayerplugin-git", "texmaker",
-        "texlive-most"
+        "texlive-most", "lastpass", "acroread", "notify-send.sh", "dunst"
     ]:
         ensure      => installed,
         provider    => pacman
@@ -39,5 +39,12 @@ class site::archui () {
         ensure      => present,
         provider    => pacman
     }
+
+    cron { "battery-warn":
+        command     => "/home/$username/Cloud/System/usr/bin/battery-warn",
+        user        => $username,
+        minute      => "*/5"
+    }
+
 }
 
